@@ -29,10 +29,6 @@ module.exports.getAllUsers = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  if (!isValidObjectId(req.params.id)) {
-    handleUserError(new Error.CastError(), res);
-    return;
-  }
   User.findByIdAndUpdate(
     req.user._id,
     { $set: req.body },
@@ -43,10 +39,6 @@ module.exports.updateProfile = (req, res) => {
 };
 
 module.exports.updateAvatar = (req, res) => {
-  if (!isValidObjectId(req.params.id)) {
-    handleUserError(new Error.CastError(), res);
-    return;
-  }
   User.findByIdAndUpdate(
     req.user._id,
     { $set: req.body },
