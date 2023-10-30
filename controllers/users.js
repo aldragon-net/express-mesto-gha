@@ -11,7 +11,7 @@ module.exports.createUser = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   if (!isValidObjectId(req.params.id)) {
-    handleUserError(Error.CastError, res);
+    handleUserError(new Error.CastError(), res);
     return;
   }
   User.findById(req.params.id)

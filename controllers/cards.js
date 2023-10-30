@@ -22,7 +22,10 @@ module.exports.deleteCard = (req, res) => {
     return;
   }
   Card.findByIdAndRemove(req.params.id)
-    .then((card) => res.send(card))
+    .then((card) => {
+      if (!card) { return Promise.reject(new Error.DocumentNotFoundError()); }
+      return res.send(card);
+    })
     .catch((err) => handleCardError(err, res));
 };
 
@@ -36,7 +39,10 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .then((card) => res.send(card))
+    .then((card) => {
+      if (!card) { return Promise.reject(new Error.DocumentNotFoundError()); }
+      return res.send(card);
+    })
     .catch((err) => handleCardError(err, res));
 };
 
@@ -47,9 +53,12 @@ module.exports.dislikeCard = (req, res) => {
   }
   Card.findByIdAndUpdate(
     req.params.id,
-    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send(card))
+    .then((card) => {
+      if (!card) { return Promise.reject(new Error.DocumentNotFoundError()); }
+      return res.send(card);
+    })
     .catch((err) => handleCardError(err, res));
 };
