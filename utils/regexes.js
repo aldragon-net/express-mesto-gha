@@ -1,1 +1,3 @@
-module.exports.validLinkRegex = /^[http:\/\/|https:\/\/][www.]{0,1}[-\._~:/?#\[\]@!$&'()*+,;='\/]*#{0,1}$/
+/* eslint-disable */
+
+module.exports.validLinkRegex = /^(http:\/\/|https:\/\/)[www.]{0,1}[\w\-\._~:\/?#\[\]@!$&'()*+,;='\/]*#{0,1}$/
