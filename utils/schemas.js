@@ -4,7 +4,7 @@ const { validLinkRegex } = require('./regexes');
 module.exports.userCreationSchema = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),
-    password: Joi.string().required().pattern(validLinkRegex),
+    password: Joi.string().min(2).required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().pattern(validLinkRegex),
@@ -14,7 +14,7 @@ module.exports.userCreationSchema = {
 module.exports.userLoginSchema = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),
-    password: Joi.string().required().pattern(/[a-zA-Z0-9_]{3,30}$/),
+    password: Joi.string().min(2).required()
   }),
 };
 
