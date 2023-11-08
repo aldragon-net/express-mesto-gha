@@ -1,0 +1,1 @@
+module.exports.validLinkRegex = /^[http:\/\/|https:\/\/][www.]{0,1}[-\._~:/?#\[\]@!$&'()*+,;='\/]*#{0,1}$/
