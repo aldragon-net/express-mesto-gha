@@ -1,11 +1,18 @@
 const { isValidObjectId, Error } = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { handleUserError } = require('../utils/errors');
 const { STATUSES } = require('../utils/statuses');
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const {
+    email, password, name, about, avatar,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      email, password: hash, name, about, avatar,
+    }))
     .then((user) => res.status(STATUSES.CREATED).send(user))
     .catch((err) => handleUserError(err, res));
 };
@@ -45,4 +52,27 @@ module.exports.updateAvatar = (req, res) => {
   )
     .then((user) => res.send(user))
     .catch((err) => handleUserError(err, res));
+};
+
+module.exports.getProfile = (req, res) => {
+  User.findById(req.user._id)
+    .orFail()
+    .then((user) => res.send(user))
+    .catch((err) => handleUserError(err, res));
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key');
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      })
+        .end();
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
 };

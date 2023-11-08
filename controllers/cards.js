@@ -22,9 +22,16 @@ module.exports.deleteCard = (req, res) => {
     handleCardError(new Error.CastError(), res);
     return;
   }
-  Card.findByIdAndRemove(req.params.id)
+  Card.findById(req.params.id)
     .orFail()
-    .then((card) => res.send(card))
+    .then((card) => {
+      if (card.owner.toHexString() === req.user._id) {
+        Card.findByIdAndRemove(card._id)
+          .then((deletedCard) => res.send(deletedCard));
+      } else {
+        throw new Error('Отказано в доступе');
+      }
+    })
     .catch((err) => handleCardError(err, res));
 };
 
