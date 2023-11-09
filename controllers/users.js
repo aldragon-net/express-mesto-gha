@@ -2,7 +2,7 @@ const { isValidObjectId, Error } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { DuplicateError } = require('../utils/errors');
+const { DuplicateError, NotFoundError } = require('../utils/errors');
 const { STATUSES } = require('../utils/statuses');
 const { MESSAGES } = require('../utils/messages');
 
@@ -33,7 +33,7 @@ module.exports.getUser = (req, res, next) => {
     return;
   }
   User.findById(req.params.id)
-    .orFail()
+    .orFail(() => new NotFoundError(MESSAGES.USER_NOT_FOUND))
     .then((user) => res.send(user))
     .catch(next);
 };
@@ -66,7 +66,7 @@ module.exports.updateAvatar = (req, res, next) => {
 
 module.exports.getProfile = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail()
+    .orFail(() => new NotFoundError(MESSAGES.USER_NOT_FOUND))
     .then((user) => res.send(user))
     .catch(next);
 };
