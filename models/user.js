@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
-const { AccessDeniedError } = require('../utils/errors');
+const { AuthorizationError } = require('../utils/errors');
 const { MESSAGES } = require('../utils/messages');
 
 const userSchema = new mongoose.Schema({
@@ -49,12 +49,12 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new AccessDeniedError(MESSAGES.AUTH_FAIL));
+        return Promise.reject(new AuthorizationError(MESSAGES.AUTH_FAIL));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new AccessDeniedError(MESSAGES.AUTH_FAIL));
+            return Promise.reject(new AuthorizationError(MESSAGES.AUTH_FAIL));
           }
           return user;
         });

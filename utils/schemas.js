@@ -11,6 +11,19 @@ module.exports.userCreationSchema = {
   }),
 };
 
+module.exports.profileUpdateSchema = {
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+  }),
+};
+
+module.exports.avatarUpdateSchema = {
+  body: Joi.object().keys({
+    avatar: Joi.string().pattern(validLinkRegex).required(),
+  }),
+};
+
 module.exports.userLoginSchema = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),

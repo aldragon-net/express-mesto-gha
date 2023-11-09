@@ -1,10 +1,10 @@
 const { STATUSES } = require('../utils/statuses');
 
-class AccessDeniedError extends Error {
+class AuthorizationError extends Error {
   constructor(message) {
     super(message);
     this.statusCode = STATUSES.UNAUTHORIZED;
   }
 }
 
-module.exports = AccessDeniedError;
+module.exports = AuthorizationError;

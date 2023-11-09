@@ -2,7 +2,8 @@ const { STATUSES } = require('./statuses');
 const { MESSAGES } = require('./messages');
 
 const NotFoundError = require('../errors/not-found-error');
-const AccessDeniedError = require('../errors/auth-error');
+const AuthorizationError = require('../errors/auth-error');
+const ForbiddenError = require('../errors/forbidden-error');
 const DuplicateError = require('../errors/duplicate-error');
 const BadRequestError = require('../errors/bad-request-error');
 
@@ -16,5 +17,5 @@ const handleError = ({ err, res }) => {
 };
 
 module.exports = {
-  NotFoundError, BadRequestError, AccessDeniedError, DuplicateError, handleError,
+  NotFoundError, BadRequestError, AuthorizationError, ForbiddenError, DuplicateError, handleError,
 };

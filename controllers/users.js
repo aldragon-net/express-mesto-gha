@@ -14,7 +14,11 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       email, password: hash, name, about, avatar,
     }))
-    .then((user) => res.status(STATUSES.CREATED).send(user))
+    .then((user) => res
+      .status(STATUSES.CREATED)
+      .send({
+        _id: user._id, name: user.name, about: user.about, avatar: user.avatar,
+      }))
     .catch((err) => {
       if (err.code === 11000) {
         next(new DuplicateError(MESSAGES.USER_EXISTS));
@@ -75,8 +79,8 @@ module.exports.login = (req, res, next) => {
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-      })
-        .end();
+      });
+      res.send({ _id: user._id });
     })
     .catch(next);
 };

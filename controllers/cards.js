@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { AccessDeniedError, NotFoundError } = require('../utils/errors');
+const { ForbiddenError, NotFoundError } = require('../utils/errors');
 const { MESSAGES } = require('../utils/messages');
 const { STATUSES } = require('../utils/statuses');
 
@@ -25,7 +25,7 @@ module.exports.deleteCard = (req, res, next) => {
         Card.findByIdAndRemove(card._id)
           .then((deletedCard) => res.send(deletedCard));
       } else {
-        throw new AccessDeniedError('Нельзя удалять чужое');
+        throw new ForbiddenError('Нельзя удалять чужое');
       }
     })
     .catch(next);
