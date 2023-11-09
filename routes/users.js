@@ -1,12 +1,14 @@
 const usersRouter = require('express').Router();
+const { celebrate } = require('celebrate');
+const { queryIdSchema, profileUpdateSchema, avatarUpdateSchema } = require('../utils/schemas');
 const {
-  createUser, getUser, getAllUsers, updateProfile, updateAvatar,
+  getUser, getAllUsers, getProfile, updateProfile, updateAvatar,
 } = require('../controllers/users');
 
-usersRouter.patch('/me/avatar', updateAvatar);
-usersRouter.patch('/me', updateProfile);
-usersRouter.get('/:id', getUser);
+usersRouter.patch('/me/avatar', celebrate(avatarUpdateSchema), updateAvatar);
+usersRouter.patch('/me', celebrate(profileUpdateSchema), updateProfile);
+usersRouter.get('/me', getProfile);
+usersRouter.get('/:id', celebrate(queryIdSchema), getUser);
 usersRouter.get('/', getAllUsers);
-usersRouter.post('/', createUser);
 
 module.exports = usersRouter;
