@@ -2,7 +2,7 @@ const { isValidObjectId, Error } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { DuplicateError, NotFoundError } = require('../utils/errors');
+const { BadRequestError, DuplicateError, NotFoundError } = require('../utils/errors');
 const { STATUSES } = require('../utils/statuses');
 const { MESSAGES } = require('../utils/messages');
 
@@ -24,9 +24,12 @@ module.exports.createUser = (req, res, next) => {
       }))
     .catch((err) => {
       if (err.code === 11000) {
-        next(new DuplicateError(MESSAGES.USER_EXISTS));
+        return next(new DuplicateError(MESSAGES.USER_EXISTS));
       }
-      next(err);
+      if (err.name === 'ValidationError') {
+        return next(new BadRequestError(MESSAGES.BAD_USER_DATA));
+      }
+      return next(err);
     });
 };
 
@@ -54,7 +57,12 @@ module.exports.updateProfile = (req, res, next) => {
     { new: true, runValidators: true },
   )
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(new BadRequestError(MESSAGES.BAD_USER_DATA));
+      }
+      return next(err);
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -64,7 +72,12 @@ module.exports.updateAvatar = (req, res, next) => {
     { new: true, runValidators: true },
   )
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(new BadRequestError(MESSAGES.BAD_AVATAR_LINK));
+      }
+      return next(err);
+    });
 };
 
 module.exports.getProfile = (req, res, next) => {

@@ -9,8 +9,7 @@ const cardsRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const { userCreationSchema, userLoginSchema } = require('./utils/schemas');
-const { handleError } = require('./utils/errors');
-const { STATUSES } = require('./utils/statuses');
+const { NotFoundError, handleError } = require('./utils/errors');
 const { MESSAGES } = require('./utils/messages');
 
 require('dotenv').config();
@@ -30,10 +29,13 @@ app.use(bodyParser.json());
 
 app.post('/signin', celebrate(userLoginSchema), login);
 app.post('/signup', celebrate(userCreationSchema), createUser);
+app.get('/signout', (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Выход' });
+});
 
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
-app.use('*', (req, res) => { res.status(STATUSES.NOT_FOUND).send({ message: MESSAGES.ROUTE_NOT_FOUND }); });
+app.use('*', auth, (req, res, next) => { next(new NotFoundError(MESSAGES.ROUTE_NOT_FOUND)); });
 
 app.use(errors());
 app.use((err, req, res, next) => {

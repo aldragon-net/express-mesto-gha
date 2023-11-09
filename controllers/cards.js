@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { ForbiddenError, NotFoundError } = require('../utils/errors');
+const { BadRequestError, ForbiddenError, NotFoundError } = require('../utils/errors');
 const { MESSAGES } = require('../utils/messages');
 const { STATUSES } = require('../utils/statuses');
 
@@ -8,7 +8,12 @@ module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.status(STATUSES.CREATED).send(card))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(new BadRequestError(MESSAGES.BAD_CARD_DATA));
+      }
+      return next(err);
+    });
 };
 
 module.exports.getAllCards = (req, res, next) => {
@@ -23,7 +28,8 @@ module.exports.deleteCard = (req, res, next) => {
     .then((card) => {
       if (card.owner.toHexString() === req.user._id) {
         Card.findByIdAndRemove(card._id)
-          .then((deletedCard) => res.send(deletedCard));
+          .then((deletedCard) => res.send(deletedCard))
+          .catch(next);
       } else {
         throw new ForbiddenError('Нельзя удалять чужое');
       }
