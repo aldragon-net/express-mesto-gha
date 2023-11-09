@@ -18,6 +18,13 @@ module.exports.userLoginSchema = {
   }),
 };
 
+module.exports.cardCreationSchema = {
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    link: Joi.string().pattern(validLinkRegex).required(),
+  }),
+};
+
 module.exports.queryIdSchema = {
   params: Joi.object().keys({
     id: Joi.string().alphanum().length(24),

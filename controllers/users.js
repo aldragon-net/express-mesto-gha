@@ -2,10 +2,11 @@ const { isValidObjectId, Error } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { handleUserError } = require('../utils/errors');
+const { DuplicateError } = require('../utils/errors');
 const { STATUSES } = require('../utils/statuses');
+const { MESSAGES } = require('../utils/messages');
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
@@ -14,54 +15,59 @@ module.exports.createUser = (req, res) => {
       email, password: hash, name, about, avatar,
     }))
     .then((user) => res.status(STATUSES.CREATED).send(user))
-    .catch((err) => handleUserError(err, res));
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new DuplicateError(MESSAGES.USER_EXISTS));
+      }
+      next(err);
+    });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
-    handleUserError(new Error.CastError(), res);
+    next(new Error.CastError());
     return;
   }
   User.findById(req.params.id)
     .orFail()
     .then((user) => res.send(user))
-    .catch((err) => handleUserError(err, res));
+    .catch(next);
 };
 
-module.exports.getAllUsers = (req, res) => {
+module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => handleUserError(err, res));
+    .catch(next);
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { $set: req.body },
     { new: true, runValidators: true },
   )
     .then((user) => res.send(user))
-    .catch((err) => handleUserError(err, res));
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { $set: req.body },
     { new: true, runValidators: true },
   )
     .then((user) => res.send(user))
-    .catch((err) => handleUserError(err, res));
+    .catch(next);
 };
 
-module.exports.getProfile = (req, res) => {
+module.exports.getProfile = (req, res, next) => {
   User.findById(req.user._id)
     .orFail()
     .then((user) => res.send(user))
-    .catch((err) => handleUserError(err, res));
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -72,7 +78,5 @@ module.exports.login = (req, res) => {
       })
         .end();
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };
