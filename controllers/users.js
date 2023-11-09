@@ -6,6 +6,9 @@ const { DuplicateError, NotFoundError } = require('../utils/errors');
 const { STATUSES } = require('../utils/statuses');
 const { MESSAGES } = require('../utils/messages');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+const JWT_KEY = NODE_ENV === 'production' ? JWT_SECRET : 'dev-not-so-secret-key';
+
 module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
@@ -75,7 +78,7 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key');
+      const token = jwt.sign({ _id: user._id }, JWT_KEY);
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,

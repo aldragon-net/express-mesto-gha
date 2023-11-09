@@ -2,6 +2,9 @@ const jwt = require('jsonwebtoken');
 const { MESSAGES } = require('../utils/messages');
 const { AuthorizationError } = require('../utils/errors');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+const JWT_KEY = NODE_ENV === 'production' ? JWT_SECRET : 'dev-not-so-secret-key';
+
 module.exports.auth = (req, res, next) => {
   const token = req.cookies.jwt;
   if (!token) {
@@ -9,7 +12,7 @@ module.exports.auth = (req, res, next) => {
   }
   let payload;
   try {
-    payload = jwt.verify(token, 'some-secret-key');
+    payload = jwt.verify(token, JWT_KEY);
   } catch (err) {
     next(new AuthorizationError(MESSAGES.TOKEN_FAIL));
   }
